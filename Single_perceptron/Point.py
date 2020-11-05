@@ -2,7 +2,7 @@ import random
 
 
 def f(x):
-    return 0.3 * x + 0.2
+    return 0.5 * x + 0.4
 
 
 class Point:

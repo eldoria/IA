@@ -3,7 +3,7 @@ import Point
 
 
 def activate(nb):
-    if nb >= Point.f(nb):
+    if nb >= 0:
         return 1
     else:
         return -1
@@ -15,7 +15,8 @@ class Perceptron:
     def __init__(self):
         self.weights[0] = random.uniform(-1, 1)
         self.weights[1] = random.uniform(-1, 1)
-        self.weights[2] = random.uniform(-1, 1)
+        self.weights[2] = random.uniform(-.5, .5)
+        self.learning_rate = 0.01
 
     def guess(self, inputs):
         the_sum = 0
@@ -24,13 +25,14 @@ class Perceptron:
         return activate(the_sum)
 
     def train(self, inputs, target):
-        error = target - self.guess(inputs)
+        guess = self.guess(inputs)
+        error = target - guess
         for i in range(len(self.weights)):
-            self.weights[i] += error * inputs[i] * 0.2
+            self.weights[i] += error * inputs[i] * self.learning_rate
 
     def guess_y(self, x):
         w0 = self.weights[0]
         w1 = self.weights[1]
         w2 = self.weights[2]
 
-        return -(x * w0 - w2) / w1
+        return -(w2/w1) - (w0/w1) * x

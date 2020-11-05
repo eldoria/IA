@@ -18,7 +18,7 @@ def show_graph():
         if perceptron.guess([pt.x, pt.y, pt.bias]) == pt.label:
             plt.scatter(pt.x, pt.y, c="green", marker='o', s=30)
         else:
-            plt.scatter(pt.x, pt.y, c="red", marker='o', s=50)
+            plt.scatter(pt.x, pt.y, c="red", marker='o', s=55)
     plt.show()
 
 
@@ -37,6 +37,10 @@ if __name__ == "__main__":
         training_is_over = 1
         for point in points:
             if perceptron.guess([point.x, point.y, point.bias]) != point.label:
+                perceptron.adapt_learning_rate()
                 training_is_over = 0
                 perceptron.train([point.x, point.y, point.bias], point.label)
-        show_graph()
+        if training_is_over == 1:
+            print("The perceptron has found a line that describe pretty well the model")
+        else:
+            show_graph()

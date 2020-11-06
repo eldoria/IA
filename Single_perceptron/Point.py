@@ -2,10 +2,6 @@ import random
 import Function
 
 
-def f(x):
-    return 0.5 * x + 0.4
-
-
 class Point:
     SIZE_POPULATION = random.randint(50, 200)
 

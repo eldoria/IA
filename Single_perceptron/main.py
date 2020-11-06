@@ -36,7 +36,6 @@ if __name__ == "__main__":
     training_is_over = 0
 
     while training_is_over == 0:
-        # print(perceptron.weights[0], perceptron.weights[1], perceptron.weights[2])
         training_is_over = 1
         for point in points:
             if perceptron.guess([point.x, point.y, point.bias]) != point.label:

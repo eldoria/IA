@@ -42,6 +42,9 @@ class Perceptron:
         print("The learning rate is : " + str(self.learning_rate))
         # If the perceptron can't converge, reset the learning rate
         if self.learning_rate > self.limit_learning_rate:
-            self.learning_rate *= 0.6
+            self.learning_rate *= 0.75
         else:
+            print("The algorithm take too long to determine a solution, learning_rate is reset")
             self.learning_rate = 5
+            # Allow the program to be more an more precise between each reset
+            self.limit_learning_rate *= 0.5

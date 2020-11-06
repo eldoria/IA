@@ -1,13 +1,12 @@
 import Point
 import Perceptron
+import Function
 import matplotlib.pyplot as plt
-
-SIZE_POPULATION = 100
 
 
 def show_graph():
-    y1 = Point.f(-1)
-    y2 = Point.f(1)
+    y1 = Function.Function.f(-1)
+    y2 = Function.Function.f(1)
     y3 = perceptron.guess_y(-1)
     y4 = perceptron.guess_y(1)
     plt.plot([-1, 1], [y1, y2], 'k--', lw=3)
@@ -23,9 +22,13 @@ def show_graph():
 
 
 if __name__ == "__main__":
-    points = [0] * SIZE_POPULATION
+    print("The number of points is randomly generated, there are "
+          + str(Point.Point.SIZE_POPULATION) + " points.")
+    print("The function is randomly generated and its equation is "
+          + str(Function.Function.a) + "x " + str(Function.Function.b))
+    points = [0] * Point.Point.SIZE_POPULATION
 
-    for i in range(SIZE_POPULATION):
+    for i in range(Point.Point.SIZE_POPULATION):
         points[i] = Point.Point()
 
     perceptron = Perceptron.Perceptron()

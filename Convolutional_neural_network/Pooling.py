@@ -1,8 +1,10 @@
 import numpy as np
+from PIL import Image
 
 
-def pooling(img_np, type_pooling):
-    result_np = np.zeros((img_np.shape[0] // 2, img_np.shape[1] // 2), dtype=np.int)
+def pooling(img, type_pooling):
+    img_np = np.array(img, dtype=np.float)
+    result_np = np.zeros((img_np.shape[0] // 2, img_np.shape[1] // 2), dtype=np.float)
     l1 = 0
     c1 = 0
     for line in range(0, img_np.shape[0], 2):
@@ -16,7 +18,8 @@ def pooling(img_np, type_pooling):
                 l1 += 1
         c1 += 1
         l1 = 0
-    return result_np
+    result_img = Image.fromarray(result_np).convert('L')
+    return result_img
 
 
 def return_max(array):
@@ -45,6 +48,6 @@ if __name__ == "__main__":
         [4, 3, 4, 8, 9, 0],
         [7, 6, 6, 6, 9, 1],
         [8, 9, 1, 4, 1, 2],
-    ], dtype=np.int)
-    test = pooling(test_tab, "max")
+    ], dtype=np.float)
+    test = pooling(test_tab, "mean")
     print(test)

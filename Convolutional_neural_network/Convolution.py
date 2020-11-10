@@ -49,4 +49,5 @@ if __name__ == "__main__":
         img = Image.open(IMAGES_RESIZE + file)
         img = c.apply_convolution(img, c.detect_edges_horizontal)
         img.save(IMAGES_CONVOLVED + file)
-        print(img)
+        img = Pooling.pooling(img, "max")
+        img.save(IMAGES_AFTER_POOLING + file)

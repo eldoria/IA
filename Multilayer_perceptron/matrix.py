@@ -2,17 +2,19 @@ import random
 
 
 class Matrix:
-    def __init__(self, nb_rows, nb_columns):
+    def __init__(self, nb_rows, nb_columns, nb_dims):
         self.nb_rows = nb_rows
         self.nb_columns = nb_columns
+        self.nb_dims = nb_dims
 
-        self.data = [[0 for i in range(nb_columns)] for j in range(nb_rows)]
+        self.data = [[[0 for i in range(nb_columns)] for j in range(nb_rows)] for k in range(nb_dims)]
 
     def randomize(self):
         # Fill the matrix with random values from -1 to 1
         for i in range(self.nb_rows):
             for j in range(self.nb_columns):
-                self.data[i][j] = random.random() * 2 - 1
+                for k in range(self.nb_dims):
+                    self.data[i][j][k] = random.random() * 2 - 1
         return self
 
     @staticmethod

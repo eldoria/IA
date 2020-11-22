@@ -11,10 +11,37 @@ def derivative_sigmoid(y):
     return y * (1 - y)
 
 
-def pow(x):
-    return x * x
+class NeuralNetwork:
+    def __init__(self, tab):
+        self.values = [[0 for i in range(tab[j])] for j in range(len(tab))]
+        self.bias = [[0 for i in range(tab[j])] for j in range(len(tab))]
+        self.weights = [[[0 for i in range(tab[k])] for j in range(tab[k + 1])] for k in range(len(tab) - 1)]
+
+        print(self.bias)
+        for i in range(len(self.bias)):
+            self.bias[i] = Matrix(len(self.bias[i]), 1, 1).randomize()
+        self.bias.print_matrix()
+
+        '''
+        for i in range(len(self.weights)):
+            for j in range(len(self.weights[i])):
+                self.weights[i][j] = Matrix(len(self.weights[i][j]), 1, 1).randomize()
+                print("i : " + str(i) + ", j : " + str(j))
+                self.weights[i][j].print_matrix()
+        '''
+        '''
+        for i in range(len(self.weights)):
+            self.weights[i] = Matrix(len(self.bias))
+        for i in range(len(self.bias)):
+            self.bias[i].print_matrix()
+        '''
 
 
+if __name__ == "__main__":
+    nn = NeuralNetwork([5, 3, 2, 2])
+
+
+'''
 class NeuralNetwork:
     def __init__(self, nb_input, nb_hidden, nb_output):
         self.nb_input = nb_input
@@ -40,7 +67,6 @@ class NeuralNetwork:
         output = Matrix.multiply_m(self.weights_ho, hidden)
         output.add(self.bias_o)
         output.map(sigmoid)
-
 
         return output.to_array()
 
@@ -87,3 +113,5 @@ class NeuralNetwork:
         self.weights_ih.add(weights_ih_deltas)
         self.bias_h.add(hidden_gradient)
 
+
+'''

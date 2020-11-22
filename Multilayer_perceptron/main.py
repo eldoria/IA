@@ -17,7 +17,7 @@ training_data = [
 
 if __name__ == '__main__':
 
-    neural_network = NeuralNetwork(2, 5, 1)
+    neural_network = NeuralNetwork(2, 3, 1)
 
     for i in range(10000):
         # data = random.choice(training_data)

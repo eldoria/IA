@@ -14,24 +14,32 @@ def plot_log(all_logs):
     for logs in all_logs:
         losses = logs.history['loss']
         plt.plot(list(range(len(losses))), losses)
+    plt.xlabel("number of epochs")
+    plt.ylabel("error")
     plt.title("error on training data")
     plt.show()
 
     for logs in all_logs:
         losses = logs.history['val_loss']
         plt.plot(list(range(len(losses))), losses)
+    plt.xlabel("number of epochs")
+    plt.ylabel("error")
     plt.title("error on testing data")
     plt.show()
 
     for logs in all_logs:
         metric = logs.history['categorical_accuracy']
         plt.plot(list(range(len(metric))), metric)
+    plt.xlabel("number of epochs")
+    plt.ylabel("accuracy")
     plt.title("prediction accuracy on training test")
     plt.show()
 
     for logs in all_logs:
         metric = logs.history['val_categorical_accuracy']
         plt.plot(list(range(len(metric))), metric)
+    plt.xlabel("number of epochs")
+    plt.ylabel("accuracy")
     plt.title("prediction accuracy on testing test")
     plt.show()
 
@@ -40,7 +48,7 @@ def linear_model(x, y, val_x, val_y, opt, loss_func, epochs, batch_size):
     model = keras.Sequential([
         # convert a two dimensional matrix into a vector
         keras.layers.Flatten(),
-        keras.layers.Dense(10, activation=keras.activations.sigmoid),
+        keras.layers.Dense(10, activation=keras.activations.softmax),
     ])
 
     model.compile(optimizer=opt, loss=loss_func, metrics=keras.metrics.categorical_accuracy)
@@ -79,3 +87,5 @@ if __name__ == "__main__":
     all_logs.append(log)
 
     plot_log(all_logs)
+
+

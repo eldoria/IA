@@ -7,7 +7,7 @@ def scheduler(epoch, lr):
     if epoch < 40:
         return lr
     else:
-        return lr * tf.math.exp(-0.01)
+        return lr * tf.math.exp(-0.04)
 
 
 def plot_log(all_logs):
@@ -91,7 +91,7 @@ def multi_layer_perceptron(x, y, val_x, val_y, opt, loss_func, epochs, batch_siz
 
 if __name__ == "__main__":
     # how many time the model will review the training data
-    epochs = 100
+    epochs = 200
     # number of data images who spreed through the network (forward propagation), after that the network
     # mean the sum of errors and make only one backpropagation
     # batch size increase the available computational parallelism and make it converge faster to optimum local
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     all_logs.append(log)
     '''
 
-    data = [('elu', "0.2"), ('relu', "0.2"), ('selu', "0.2"), ('sigmoid', "0"), ('tanh', "0.2")]
+    data = [('elu', "0.2"), ('relu', "0.2"),  ('tanh', "0.2")]
 
     for activation, dropout in data:
         dropout = float(dropout)

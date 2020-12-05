@@ -68,95 +68,22 @@ def linear_model(x, y, val_x, val_y, opt, loss_func, epochs, batch_size):
     return logs
 
 
-def multi_layer_perceptron_relu(x, y, val_x, val_y, opt, loss_func, epochs, batch_size):
+def multi_layer_perceptron(x, y, val_x, val_y, opt, loss_func, epochs, batch_size, activation, dropout):
     model = keras.Sequential([
         # convert a two dimensional matrix into a vector
         keras.layers.Flatten(),
-        keras.layers.Dense(120, activation=keras.activations.relu),
-        keras.layers.Dropout(0.2),
-        keras.layers.Dense(120, activation=keras.activations.relu),
-        keras.layers.Dropout(0.2),
+        keras.layers.Dense(120, activation=activation),
+        keras.layers.Dropout(dropout),
+        keras.layers.Dense(120, activation=activation),
+        keras.layers.Dropout(dropout),
         keras.layers.Dense(10, activation=keras.activations.softmax),
     ])
 
     model.compile(optimizer=opt, loss=loss_func, metrics=keras.metrics.categorical_accuracy)
 
     logs = model.fit(x, y, validation_data=(val_x, val_y), epochs=epochs, batch_size=batch_size,
-                     callbacks=[keras.callbacks.LearningRateScheduler(scheduler)])
-    model.summary()
-
-    return logs
-
-def multi_layer_perceptron_sigmoid(x, y, val_x, val_y, opt, loss_func, epochs, batch_size):
-    model = keras.Sequential([
-        # convert a two dimensional matrix into a vector
-        keras.layers.Flatten(),
-        keras.layers.Dense(120, activation=keras.activations.sigmoid),
-        keras.layers.Dense(120, activation=keras.activations.sigmoid),
-        keras.layers.Dense(10, activation=keras.activations.softmax),
-    ])
-
-    model.compile(optimizer=opt, loss=loss_func, metrics=keras.metrics.categorical_accuracy)
-
-    logs = model.fit(x, y, validation_data=(val_x, val_y), epochs=epochs, batch_size=batch_size,
-                     callbacks=[keras.callbacks.LearningRateScheduler(scheduler)])
-    model.summary()
-
-    return logs
-
-def multi_layer_perceptron_tanh(x, y, val_x, val_y, opt, loss_func, epochs, batch_size):
-    model = keras.Sequential([
-        # convert a two dimensional matrix into a vector
-        keras.layers.Flatten(),
-        keras.layers.Dense(120, activation=keras.activations.tanh),
-        keras.layers.Dropout(0.2),
-        keras.layers.Dense(120, activation=keras.activations.tanh),
-        keras.layers.Dropout(0.2),
-        keras.layers.Dense(10, activation=keras.activations.softmax),
-    ])
-
-    model.compile(optimizer=opt, loss=loss_func, metrics=keras.metrics.categorical_accuracy)
-
-    logs = model.fit(x, y, validation_data=(val_x, val_y), epochs=epochs, batch_size=batch_size,
-                     callbacks=[keras.callbacks.LearningRateScheduler(scheduler)])
-    model.summary()
-
-    return logs
-
-def multi_layer_perceptron_selu(x, y, val_x, val_y, opt, loss_func, epochs, batch_size):
-    model = keras.Sequential([
-        # convert a two dimensional matrix into a vector
-        keras.layers.Flatten(),
-        keras.layers.Dense(120, activation=keras.activations.selu),
-        keras.layers.Dropout(0.2),
-        keras.layers.Dense(120, activation=keras.activations.selu),
-        keras.layers.Dropout(0.2),
-        keras.layers.Dense(10, activation=keras.activations.softmax),
-    ])
-
-    model.compile(optimizer=opt, loss=loss_func, metrics=keras.metrics.categorical_accuracy)
-
-    logs = model.fit(x, y, validation_data=(val_x, val_y), epochs=epochs, batch_size=batch_size,
-                     callbacks=[keras.callbacks.LearningRateScheduler(scheduler)])
-    model.summary()
-
-    return logs
-
-def multi_layer_perceptron_elu(x, y, val_x, val_y, opt, loss_func, epochs, batch_size):
-    model = keras.Sequential([
-        # convert a two dimensional matrix into a vector
-        keras.layers.Flatten(),
-        keras.layers.Dense(120, activation=keras.activations.elu),
-        keras.layers.Dropout(0.2),
-        keras.layers.Dense(120, activation=keras.activations.elu),
-        keras.layers.Dropout(0.2),
-        keras.layers.Dense(10, activation=keras.activations.softmax),
-    ])
-
-    model.compile(optimizer=opt, loss=loss_func, metrics=keras.metrics.categorical_accuracy)
-
-    logs = model.fit(x, y, validation_data=(val_x, val_y), epochs=epochs, batch_size=batch_size,
-                     callbacks=[keras.callbacks.LearningRateScheduler(scheduler)])
+                     callbacks=[keras.callbacks.LearningRateScheduler(scheduler),
+                                keras.callbacks.EarlyStopping(monitor='val_loss', patience=10)])
     model.summary()
 
     return logs
@@ -182,7 +109,6 @@ if __name__ == "__main__":
     y_train = keras.utils.to_categorical(y_train, 10)
     y_test = keras.utils.to_categorical(y_test, 10)
 
-
     all_logs = []
     '''
     log = linear_model(x_train, y_train, x_test, y_test, keras.optimizers.SGD(lr=0.05, momentum=0.95),
@@ -191,31 +117,14 @@ if __name__ == "__main__":
     all_logs.append(log)
     '''
 
-    log = multi_layer_perceptron_elu(x_train, y_train, x_test, y_test, keras.optimizers.SGD(lr=0.05, momentum=0.95),
-                       keras.losses.categorical_crossentropy, epochs=epochs, batch_size=batch_size)
-    log.history['name'] = "elu"
-    all_logs.append(log)
+    data = [('elu', "0.2"), ('relu', "0.2"), ('selu', "0.2"), ('sigmoid', "0"), ('tanh', "0.2")]
 
-    log = multi_layer_perceptron_relu(x_train, y_train, x_test, y_test, keras.optimizers.SGD(lr=0.05, momentum=0.95),
-                                     keras.losses.categorical_crossentropy, epochs=epochs, batch_size=batch_size)
-    log.history['name'] = "relu"
-    all_logs.append(log)
+    for activation, dropout in data:
+        dropout = float(dropout)
 
-    log = multi_layer_perceptron_selu(x_train, y_train, x_test, y_test, keras.optimizers.SGD(lr=0.05, momentum=0.95),
-                                     keras.losses.categorical_crossentropy, epochs=epochs, batch_size=batch_size)
-    log.history['name'] = "selu"
-    all_logs.append(log)
-
-    log = multi_layer_perceptron_sigmoid(x_train, y_train, x_test, y_test, keras.optimizers.SGD(lr=0.05, momentum=0.95),
-                                     keras.losses.categorical_crossentropy, epochs=epochs, batch_size=batch_size)
-    log.history['name'] = "sigmoid"
-    all_logs.append(log)
-
-    log = multi_layer_perceptron_tanh(x_train, y_train, x_test, y_test, keras.optimizers.SGD(lr=0.05, momentum=0.95),
-                                     keras.losses.categorical_crossentropy, epochs=epochs, batch_size=batch_size)
-    log.history['name'] = "tanh"
-    all_logs.append(log)
+        log = multi_layer_perceptron(x_train, y_train, x_test, y_test, keras.optimizers.SGD(lr=0.05, momentum=0.95),
+                                     keras.losses.categorical_crossentropy, epochs, batch_size, activation, dropout)
+        log.history['name'] = activation
+        all_logs.append(log)
 
     plot_log(all_logs)
-
-

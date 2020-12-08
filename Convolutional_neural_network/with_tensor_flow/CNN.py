@@ -1,13 +1,14 @@
 import tensorflow as tf
 import tensorflow.keras as keras
 import matplotlib.pyplot as plt
+from tensorflow.keras import datasets, layers, models
 
 
 def scheduler(epoch, lr):
-    if epoch < 40:
+    if epoch < 25:
         return lr
     else:
-        return lr * tf.math.exp(-0.04)
+        return lr * tf.math.exp(-0.05)
 
 
 def plot_log(all_logs):
@@ -62,7 +63,8 @@ def linear_model(x, y, val_x, val_y, opt, loss_func, epochs, batch_size):
     model.compile(optimizer=opt, loss=loss_func, metrics=keras.metrics.categorical_accuracy)
 
     logs = model.fit(x, y, validation_data=(val_x, val_y), epochs=epochs, batch_size=batch_size,
-                     callbacks=[keras.callbacks.LearningRateScheduler(scheduler)])
+                     callbacks=[keras.callbacks.LearningRateScheduler(scheduler),
+                                keras.callbacks.EarlyStopping(monitor='val_loss', patience=15)])
     model.summary()
 
     return logs
@@ -83,7 +85,64 @@ def multi_layer_perceptron(x, y, val_x, val_y, opt, loss_func, epochs, batch_siz
 
     logs = model.fit(x, y, validation_data=(val_x, val_y), epochs=epochs, batch_size=batch_size,
                      callbacks=[keras.callbacks.LearningRateScheduler(scheduler),
-                                keras.callbacks.EarlyStopping(monitor='val_loss', patience=10)])
+                                keras.callbacks.EarlyStopping(monitor='val_loss', patience=15)])
+    model.summary()
+
+    return logs
+
+
+def convolutional_neural_network(x, y, val_x, val_y, opt, loss_func, epochs, batch_size, activation, dropout):
+    model = keras.Sequential([
+        keras.layers.Reshape((28, 28, 1)),
+
+        keras.layers.Conv2D(32, (3, 3), padding="same", activation=activation,
+                            kernel_regularizer=keras.regularizers.l2(0.0001)),
+        keras.layers.MaxPool2D(),
+        keras.layers.Dropout(dropout),
+
+        keras.layers.Conv2D(32, (3, 3), padding="same", activation=activation,
+                            kernel_regularizer=keras.regularizers.l2(0.0001)),
+        keras.layers.MaxPool2D(),
+        keras.layers.Dropout(dropout),
+
+        keras.layers.Conv2D(32, (3, 3), padding="same", activation=activation,
+                            kernel_regularizer=keras.regularizers.l2(0.0001)),
+        keras.layers.MaxPool2D(),
+        keras.layers.Dropout(dropout),
+
+        keras.layers.Flatten(),
+
+        keras.layers.Dense(10, activation=keras.activations.softmax,
+                           kernel_regularizer=keras.regularizers.l2(0.0001))
+    ])
+
+    model.compile(optimizer=opt, loss=loss_func, metrics=keras.metrics.categorical_accuracy)
+
+    logs = model.fit(x, y, validation_data=(val_x, val_y), epochs=epochs, batch_size=batch_size,
+                     callbacks=[keras.callbacks.LearningRateScheduler(scheduler)])
+
+    model.summary()
+
+    return logs
+
+
+
+def test_CNN(x, y, val_x, val_y, opt, loss_func, epochs, batch_size, activation, dropout):
+    model = models.Sequential()
+    model.add(layers.Reshape((28, 28, 1)))
+
+    model.add(layers.Conv2D(36, (3, 3), activation='relu'))
+    model.add(layers.MaxPooling2D())
+
+    model.add(layers.Flatten())
+    model.add(layers.Dense(64, activation='relu'))
+    model.add(layers.Dense(10))
+
+    model.compile(optimizer=opt, loss=loss_func, metrics=keras.metrics.categorical_accuracy)
+
+    logs = model.fit(x, y, validation_data=(val_x, val_y), epochs=epochs, batch_size=batch_size,
+                     callbacks=[keras.callbacks.LearningRateScheduler(scheduler)])
+
     model.summary()
 
     return logs
@@ -91,7 +150,7 @@ def multi_layer_perceptron(x, y, val_x, val_y, opt, loss_func, epochs, batch_siz
 
 if __name__ == "__main__":
     # how many time the model will review the training data
-    epochs = 200
+    epochs = 80
     # number of data images who spreed through the network (forward propagation), after that the network
     # mean the sum of errors and make only one backpropagation
     # batch size increase the available computational parallelism and make it converge faster to optimum local
@@ -110,21 +169,35 @@ if __name__ == "__main__":
     y_test = keras.utils.to_categorical(y_test, 10)
 
     all_logs = []
+
     '''
     log = linear_model(x_train, y_train, x_test, y_test, keras.optimizers.SGD(lr=0.05, momentum=0.95),
                        keras.losses.categorical_crossentropy, epochs=epochs, batch_size=batch_size)
     log.history['name'] = "linear model"
     all_logs.append(log)
     '''
+    # activation = "relu"
+    data = [("tanh", "0.2"), ("selu", "0.2"), ("relu", "0.2"), ("sigmoid", "0.2"), ("elu", "0.2")]
+    dropout = 0.2
 
-    data = [('elu', "0.2"), ('relu', "0.2"),  ('tanh', "0.2")]
-
+    '''
+    log = multi_layer_perceptron(x_train, y_train, x_test, y_test, keras.optimizers.SGD(lr=0.05, momentum=0.95),
+                                 keras.losses.categorical_crossentropy, epochs, batch_size, "relu", dropout)
+    log.history['name'] = "MLP - relu"
+    all_logs.append(log)
+    '''
+    logs = test_CNN(x_train, y_train, x_test, y_test, keras.optimizers.SGD(lr=0.05, momentum=0.95),
+                    keras.losses.categorical_crossentropy, epochs=epochs, batch_size=batch_size, activation="relu",
+                    dropout=dropout)
+    all_logs.append(logs)
+    '''
     for activation, dropout in data:
         dropout = float(dropout)
-
-        log = multi_layer_perceptron(x_train, y_train, x_test, y_test, keras.optimizers.SGD(lr=0.05, momentum=0.95),
-                                     keras.losses.categorical_crossentropy, epochs, batch_size, activation, dropout)
+        print("activation : " + activation + ", dropout : " + str(dropout))
+        log = convolutional_neural_network(x_train, y_train, x_test, y_test, keras.optimizers.SGD(lr=0.05, momentum=0.95),
+                                           keras.losses.categorical_crossentropy, epochs, batch_size, activation, dropout)
         log.history['name'] = activation
         all_logs.append(log)
-
+    '''
     plot_log(all_logs)
+

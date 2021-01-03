@@ -6,11 +6,9 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 
 dataGen_training = ImageDataGenerator(
-  horizontal_flip=True,
-  vertical_flip=False,
-  rescale=1. / 255,
-  brightness_range=(0.1, 0.9),
-  channel_shift_range=15.0,
+    rotation_range=5,
+    shear_range=12,
+    rescale=1. / 255,
 )
 
 dataGen_testing = ImageDataGenerator(
@@ -19,10 +17,10 @@ dataGen_testing = ImageDataGenerator(
 
 
 def scheduler(epoch, lr):
-    if epoch < 5:
+    if epoch < 20:
         return lr
     else:
-        return lr * tf.math.exp(-0.07)
+        return lr * tf.math.exp(-0.05)
 
 
 def plot_log(all_logs):
@@ -94,6 +92,7 @@ def multi_layer_perceptron(x, y, val_x, val_y, opt, loss_func, epochs, batch_siz
     logs = model.fit(x, y, validation_data=(val_x, val_y), epochs=epochs, batch_size=batch_size,
                      callbacks=[keras.callbacks.LearningRateScheduler(scheduler),
                                 keras.callbacks.EarlyStopping(monitor='val_loss', patience=15)])
+
     model.summary()
 
     return logs
@@ -121,27 +120,22 @@ def convolutional_neural_network(activation):
         Conv2D(48, (3, 3), padding="same", activation=activation),
         BatchNormalization(),
 
-        keras.layers.Flatten(),
+        Flatten(),
 
-        keras.layers.Dense(30, activation=activation),
-
-        BatchNormalization(),
-
-        keras.layers.Dense(10, activation=keras.activations.softmax)
+        Dense(10, activation=keras.activations.softmax)
     ])
 
-    model.compile(optimizer=keras.optimizers.RMSprop(lr=0.01), loss=keras.losses.categorical_crossentropy,
-                  metrics=keras.metrics.categorical_accuracy)
+    model.compile(optimizer=keras.optimizers.Adam(), loss=keras.losses.categorical_crossentropy,
+                  metrics=keras.metrics.categorical_accuracy,)
 
     logs = model.fit_generator(
         train_generator,
         steps_per_epoch=len(x_train) // batch_size,
-        epochs=200,
-        callbacks=[keras.callbacks.EarlyStopping(monitor='val_loss', patience=10),
-                   keras.callbacks.LearningRateScheduler(scheduler)],
+        epochs=180,
         validation_data=validation_generator,
         validation_freq=1,
         validation_steps=valid_steps,
+        callbacks=keras.callbacks.EarlyStopping(monitor='val_loss', patience=25),
         verbose=2,
     )
 
@@ -157,13 +151,15 @@ if __name__ == "__main__":
     # mean the sum of errors and make only one backpropagation
     # batch size increase the available computational parallelism and make it converge faster to optimum local
     # but algorithm with large batch size will hardly find the minimum global compared to little bach size
-    batch_size = 216
+    batch_size = 256
 
     # get data of training and testing from fashion mnist dataset
-    (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+    (x_train, y_train), (x_test, y_test) = keras.datasets.fashion_mnist.load_data()
 
     x_train = np.expand_dims(x_train, axis=3)
     x_test = np.expand_dims(x_test, axis=3)
+    y_train = np.expand_dims(y_train, axis=1)
+    y_test = np.expand_dims(y_test, axis=1)
 
     # pixel have values from 0 to 255, normalize them
     x_train = x_train / 255.0
@@ -175,8 +171,8 @@ if __name__ == "__main__":
 
     train_generator = dataGen_training.flow(x_train, y_train, batch_size=batch_size)
 
-    x_valid = x_train[:30 * batch_size]
-    y_valid = y_train[:30 * batch_size]
+    x_valid = x_train[:50 * batch_size]
+    y_valid = y_train[:50 * batch_size]
 
     valid_steps = x_valid.shape[0] // batch_size
     validation_generator = dataGen_testing.flow(x_valid, y_valid, batch_size=batch_size)
